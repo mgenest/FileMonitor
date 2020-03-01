@@ -1,2 +1,2 @@
 # FileMonitor
-A simple pure Python package for monitoring files and directories
+This project is for a pure Python module for a simple file monitor.  At this time I am not accepting pull requests.
