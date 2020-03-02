@@ -51,91 +51,91 @@ class FileMonitor():
         self.__msg_for_fldr_removed_call_bk = list()
         self.__polling_datetime = None
 
-    def getPollDatetime(self):
+    def get_poll_datetime(self):
         """getter for the last poll time
-           
+
            this is meant to be used in a call back like
-           the function you would pass to 
-           setFuncToCallOnPolling(...)
+           the function you would pass to
+           set_func_to_call_on_polling(...)
            return type: datetime.datetime
         """
         return self.__polling_datetime
 
-    def setFuncToCallOnPolling(self, aFunctionName, aListOfArgs):
+    def set_func_to_call_on_polling(self, function_name, arglist):
         """set the callback function when for when a polling occurs
-           ARGS: aFunctionName --> the name of the function to call
-                 aListOfArgs   --> the args to pass to the callback function 
+           ARGS: function_name --> the name of the function to call
+                 arglist   --> the args to pass to the callback function
         """
-        self.__poll_function_to_call = aFunctionName
-        self.__a_list_of_poll_func_args = aListOfArgs
+        self.__poll_function_to_call = function_name
+        self.__a_list_of_poll_func_args = arglist
 
-    def __callFunctionPollMon(self):
+    def __call_function_poll_mon(self):
         self.__poll_function_to_call(*self.__a_list_of_poll_func_args)
-        
-    
-    def setFileList(self, aListOfFiles):
+
+
+    def set_file_list(self, filelist):
         """a list of paths and files that you want to
            check for.  this will monitor to see if that
            file(s) exist.
-           you can pass a callback function to 
-           setFuncToCallFileMon(...) to provide feedback
+           you can pass a callback function to
+           set_func_to_call_file_mon(...) to provide feedback
            and potentially perform an action based on
            that feedback
-           ARGS: aListOfFiles --> a list of 1 or more 
+           ARGS: filelist --> a list of 1 or more
                                   paths and files
         """
-        self.__file_list = aListOfFiles
+        self.__file_list = filelist
 
-    def getFileList(self):
+    def get_file_list(self):
         return self.__file_list
 
-    def setFolderList(self, aListOfFolders):
-        self.__folder_list = aListOfFolders
+    def set_folder_list(self, folderlist):
+        self.__folder_list = folderlist
 
-    def getFolderList(self):
+    def get_folder_list(self):
         return self.__folder_list
 
-    def getFileCallBkMsg(self):
+    def get_file_call_bk_msg(self):
         return self.__msg_for_file_call_bk
 
-    def getFolderCreatedCallBkMsg(self):
+    def get_folder_created_call_bk_msg(self):
         return self.__msg_for_fldr_created_call_bk
 
-    def getFolderRemovedCallBkMsg(self):
+    def get_folder_removed_call_bk_msg(self):
         return self.__msg_for_fldr_removed_call_bk
-    
-    def stopMonitor(self):
+
+    def stop_monitor(self):
         self.__stop_flag = True
 
-    def setStopDateTime(self, aDateTime):
-        self.__stop_date_time = aDateTime
+    def set_stop_datetime(self, thedatetime):
+        self.__stop_date_time = thedatetime
 
-    def setFuncToCallFileMon(self, aFunctionName, aListOfArgs):
-        self.__file_function_to_call = aFunctionName
-        self.__a_list_of_file_func_args = aListOfArgs
+    def set_func_to_call_file_mon(self, function_name, arglist):
+        self.__file_function_to_call = function_name
+        self.__a_list_of_file_func_args = arglist
 
-    def __callFunctionFileMon(self):
+    def __call_function_file_mon(self):
         self.__file_function_to_call(*self.__a_list_of_file_func_args)
-        
-    def setFuncToCallFldrMon(self, aFunctionName, aListOfArgs):
-        self.__fldr_function_to_call = aFunctionName
-        self.__a_list_of_fldr_func_args = aListOfArgs
 
-    def __callFunctionFldrMon(self):
+    def set_func_to_call_fldr_mon(self, function_name, arglist):
+        self.__fldr_function_to_call = function_name
+        self.__a_list_of_fldr_func_args = arglist
+
+    def __call_function_fldr_mon(self):
         self.__fldr_function_to_call(*self.__a_list_of_fldr_func_args)
-        
-    def startMonitor(self, intPollInterval):
-        self.__poll_interval = intPollInterval
 
-        while self.__stop_flag == False:
-            curDtTm = datetime.datetime.now()
-            self.__polling_datetime = curDtTm
-            if self.__stop_date_time != None and curDtTm >= self.__stop_date_time:
+    def start_monitor(self, int_poll_interval):
+        self.__poll_interval = int_poll_interval
+
+        while not self.__stop_flag:                           # stop flag Flase
+            current_datetime = datetime.datetime.now()
+            self.__polling_datetime = current_datetime
+            if self.__stop_date_time is not None and current_datetime >= self.__stop_date_time:
                 self.__stop_flag = True
                 break
 
-            if self.__poll_function_to_call != None:
-                self.__callFunctionPollMon()
+            if self.__poll_function_to_call is not None:
+                self.__call_function_poll_mon()
 
             self.__msg_for_file_call_bk.clear()   # remove old file messages
             #self.__msg_for_fldr_call_bk.clear()   # remove old folder messages
@@ -143,34 +143,34 @@ class FileMonitor():
             self.__msg_for_fldr_removed_call_bk.clear()   # ditto
 
             ### checks on specified file lists ###
-            for aFile in self.__file_list:
+            for somefile in self.__file_list:
                 # check on file existance
-                if os.path.exists(aFile):
-                    self.__msg_for_file_call_bk.append([aFile, os.stat(aFile).st_atime])
-            if self.__file_function_to_call != None:
-                self.__callFunctionFileMon()
+                if os.path.exists(somefile):
+                    self.__msg_for_file_call_bk.append([somefile, os.stat(somefile).st_atime])
+            if self.__file_function_to_call is not None:
+                self.__call_function_file_mon()
 
                 #check for datetime changes on existing file
 
             ### checks on specified folders ###
             self.__monitored_temp_file_dict.clear()   #clear dict for new data
-            for aDir in self.__folder_list:
-                aFileList = os.listdir(aDir)
-                if not aDir.endswith("\\"):
-                    aDir += "\\"
+            for somedir in self.__folder_list:
+                filelist = os.listdir(somedir)
+                if not somedir.endswith("\\"):
+                    somedir += "\\"
 
-                for aFile in aFileList:
-                    stRes = os.stat(aDir + aFile)
-                    self.__monitored_temp_file_dict[aDir + aFile] = [stRes.st_atime, stRes.st_mtime]
-                    
+                for somefile in filelist:
+                    stRes = os.stat(somedir + somefile)
+                    self.__monitored_temp_file_dict[somedir + somefile] = [stRes.st_atime, stRes.st_mtime]
+
 
             #1) new files
             #2) removed files
             #3) datetime changes (atime,mtime) on existing files
 
             ## compare folders/files ##
-            
-            if self.__monitored_file_dict != None:
+
+            if self.__monitored_file_dict is not None:
                 # new file created?
                 for currF in self.__monitored_temp_file_dict:
                     if currF not in self.__monitored_file_dict:
@@ -183,9 +183,9 @@ class FileMonitor():
                     if prevF not in self.__monitored_temp_file_dict:
                         #print("Removed file: " + prevF)
                         self.__msg_for_fldr_removed_call_bk.append(prevF)
-                        
-                if self.__callFunctionFldrMon != None:
-                    self.__callFunctionFldrMon()
+
+                if self.__call_function_fldr_mon is not None:
+                    self.__call_function_fldr_mon()
             else:
                 self.__monitored_file_dict = dict() # set field to a new dictionary
 
@@ -198,4 +198,3 @@ class FileMonitor():
                 time.sleep(self.__poll_interval)
 
                 ###  probably need to and a elese and break when true stopflag
-                    
